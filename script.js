@@ -1,0 +1,24 @@
+document.documentElement.classList.add('js');
+const menuButton=document.querySelector('.menu-toggle');
+const menu=document.querySelector('#menu');
+function closeMenu(){menu.hidden=true;menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Open menu');document.body.classList.remove('locked');document.querySelector('main').inert=false}
+menuButton.addEventListener('click',()=>{const open=menu.hidden;menu.hidden=!open;menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Close menu':'Open menu');document.body.classList.toggle('locked',open);document.querySelector('main').inert=open;if(open)menu.querySelector('a').focus()});
+menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
+document.querySelectorAll('.header a').forEach(a=>a.addEventListener('click',closeMenu));
+document.addEventListener('keydown',e=>{if(menu.hidden)return;if(e.key==='Escape'){closeMenu();menuButton.focus()}if(e.key==='Tab'){const items=[menuButton,...menu.querySelectorAll('a')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0].focus()}}});
+const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}})},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+const filmDialog=document.querySelector('#film-dialog');
+const frame=document.querySelector('#video-frame');
+function openFilm(){closeMenu();frame.replaceChildren();const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/bO5056tuYEI?autoplay=1&rel=0';iframe.title='Arknat 2025 - Sörmland';iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';frame.append(iframe);filmDialog.showModal();document.body.classList.add('locked')}
+document.querySelectorAll('[data-film]').forEach(b=>b.addEventListener('click',openFilm));
+filmDialog.addEventListener('close',()=>frame.replaceChildren());
+const projects={
+pod:{title:'Pod',location:'Österslöv, Skåne · 2021',image:'assets/pod.webp',alt:'The Pod timber shelter surrounded by beech trees',description:'Inspired by beech pods and the forest canopy, this rounded, cedar-shingled shelter rests among trees and boulders at Österslövs badplats, near Kristianstad.',url:'https://arknat.com/skane-pod/',credit:'Photography: Tommie Svanstrom Ohlson. Source: Arknat.'},
+hefna:{title:'Hefna',location:'Fagerön, Sörmland · 2025',image:'assets/hefna.webp',alt:'Hefna shelter with a juniper-clad roof and a timber frame',description:'A raised, three-legged shelter between the pine forest and Lake Näsnaren. The roof is clad in juniper branches, drawing on the Norwegian craft of brakekledning.',url:'https://arknat.com/sormland-hefna/',credit:'Photography: Arknat project archive.'},
+hide:{title:'Hide&Seek',location:'Femöre, Oxelösund · 2025',image:'assets/hide.webp',alt:'Hide & Seek shelter between rocks and pine trees',description:'Hidden behind coastal rocks and wind-bent pines, this shelter rewards a closer look. A timber bridge connects the sheltered interior, a roof terrace and the rock above.',url:'https://arknat.com/sormland-hideseek/',credit:'Photography: Arknat project archive.'}
+};
+const projectDialog=document.querySelector('#project-dialog');
+document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',()=>{const p=projects[button.dataset.project];document.querySelector('#project-title').textContent=p.title;document.querySelector('#detail-location').textContent=p.location;document.querySelector('#detail-description').textContent=p.description;document.querySelector('#detail-image').src=p.image;document.querySelector('#detail-image').alt=p.alt;document.querySelector('#detail-source').href=p.url;document.querySelector('#detail-credit').textContent=p.credit;projectDialog.showModal();document.body.classList.add('locked')}));
+document.querySelector('#credits-open').addEventListener('click',()=>{document.querySelector('#credits-dialog').showModal();document.body.classList.add('locked')});
+document.querySelectorAll('dialog').forEach(dialog=>{dialog.querySelector('.dialog-close').addEventListener('click',()=>{if(dialog===filmDialog)frame.replaceChildren();dialog.close()});dialog.addEventListener('click',event=>{const r=dialog.getBoundingClientRect();if(event.target===dialog&&(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom))dialog.close()});dialog.addEventListener('close',()=>document.body.classList.remove('locked'))});
